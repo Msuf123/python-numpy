@@ -8,4 +8,5 @@ array_two=np.array([4,5,6])
 # print(additon)
 # print(array_one-array_two)
 # print(array_one*array_two)
-print(np.vstack(array_one,array_two))
+print(np.vstack((array_two,array_one)))
+
