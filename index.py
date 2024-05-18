@@ -129,7 +129,7 @@ def row_echelon_form(A, B):
 
 def back_substitution(M):
     """
-    Perform back substitution on an augmented matrix (with unique solution) in reduced row echelon form to find the solution to the linear system.
+    Perform back substitution on an augmented matrix (with unique solution) in reduced row echelon form to find the
 
     Parameters:
     - M (numpy.array): The augmented matrix in row echelon form with unitary pivots (n x n+1).
@@ -155,16 +155,19 @@ def back_substitution(M):
 
         #Iterate over the rows above the substitution_row
         for j in range(row):
+
             # Get the row to be reduced. The indexing here is similar as above, with the row variable replaced by the j variable.
             row_to_reduce = M[j]
 
             # Get the value of the element at the found index in the row to reduce
             value = row_to_reduce[index]
-
+            print(row_to_reduce,substitution_row)
             # Perform the back substitution step using the formula row_to_reduce -> row_to_reduce - value * substitution_row
-            row_to_reduce = row_to_reduce-value*substitution_row
+            row_to_reduce = row_to_reduce-value*M[substitution_row]
             # Replace the updated row in the matrix, be careful with indexing!
+
             M[j, :] = row_to_reduce
+
 
     ### END CODE HERE ####
 
@@ -172,7 +175,38 @@ def back_substitution(M):
     solution = M[:, -1]
 
     return solution
-A = np.array([[1,0,0],[0,1,0], [0,0,1]])
-B = np.array([[0], [0], [0]])
-print(row_echelon_form(A,B))
-print(back_substitution(row_echelon_form(A, B)))
+
+
+# GRADED FUNCTION: gaussian_elimination
+
+def gaussian_elimination(A, B):
+    """
+    Solve a linear system represented by an augmented matrix using the Gaussian elimination method.
+
+    Parameters:
+    - A (numpy.array): Square matrix of size n x n representing the coefficients of the linear system
+    - B (numpy.array): Column matrix of size 1 x n representing the constant terms.
+
+    Returns:
+    numpy.array or str: The solution vector if a unique solution exists, or a string indicating the type of solution.
+    """
+
+    ### START CODE HERE ###
+
+    # Get the matrix in row echelon form
+    row_echelon_M = row_echelon_form(A, B)
+
+    # If the system is non-singular, then perform back substitution to get the result.
+    # Since the function row_echelon_form returns a string if there is no solution, let's check for that.
+    # The function isinstance checks if the first argument has the type as the second argument, returning True if it does and False otherwise.
+    if not isinstance(row_echelon_M, str):
+        solution = back_substitution(row_echelon_M)
+
+    ### END SOLUTION HERE ###
+
+    return solution
+A = np.array([[2,3],[3,4]])
+B = np.array([[0], [5]])
+print(gaussian_elimination(A, B))
+
+
