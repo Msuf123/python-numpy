@@ -1,21 +1,18 @@
-import numpy as np
-
-
-def swap_rows(M, row_index_1, row_index_2):
+# GRADED FUNCTION: row_echelon_form
+import numpy as  np
+def augmented_matrix(A, B):
     """
-    Swap rows in the given matrix.
+    Create an augmented matrix by horizontally stacking two matrices A and B.
 
     Parameters:
-    - matrix (numpy.array): The input matrix to perform row swaps on.
-    - row_index_1 (int): Index of the first row to be swapped.
-    - row_index_2 (int): Index of the second row to be swapped.
-    """
+    - A (numpy.array): First matrix.
+    - B (numpy.array): Second matrix.
 
-    # Copy matrix M so the changes do not affect the original matrix.
-    M = M.copy()
-    # Swap indexes
-    M[[row_index_1, row_index_2]] = M[[row_index_2, row_index_1]]
-    return M
+    Returns:
+    - numpy.array: Augmented matrix obtained by horizontally stacking A and B.
+    """
+    augmented_M = np.hstack((A,B))
+    return augmented_M
 def get_index_first_non_zero_value_from_column(M, column, starting_row):
     """
     Retrieve the index of the first non-zero value in a specified column of the given matrix.
@@ -40,65 +37,89 @@ def get_index_first_non_zero_value_from_column(M, column, starting_row):
             return index
     # If no non-zero value is found below it, return -1.
     return -1
-N = np.array([
-[0, 5, -3 ,6 ,8],
-[0, 6, 3, 8, 1],
-[0, 0, 0, 0, 0],
-[0, 0, 0 ,0 ,7],
-[0, 2, 1, 0, 4]
-]
-)
-print(N)
-print(get_index_first_non_zero_value_from_column(N, column = 4, starting_row = 2))
-
-
-def get_index_first_non_zero_value_from_row(M, row, augmented=False):
+def row_echelon_form(A, B):
     """
-    Find the index of the first non-zero value in the specified row of the given matrix.
+    Utilizes elementary row operations to transform a given set of matrices,
+    which represent the coefficients and constant terms of a linear system, into row echelon form.
 
     Parameters:
-    - matrix (numpy.array): The input matrix to search for non-zero values.
-    - row (int): The index of the row to search.
-    - augmented (bool): Pass this True if you are dealing with an augmented matrix,
-                        so it will ignore the constant values (the last column in the augmented matrix).
+    - A (numpy.array): The input square matrix of coefficients.
+    - B (numpy.array): The input column matrix of constant terms
 
     Returns:
-    int: The index of the first non-zero value in the specified row.
-                Returns -1 if no non-zero value is found.
+    numpy.array: A new augmented matrix in row echelon form with pivots as 1.
     """
 
-    # Create a copy to avoid modifying the original matrix
-    M = M.copy()
+    # Before any computation, check if matrix A (coefficient matrix) has non-zero determinant.
+    # It will be used the numpy sub library np.linalg to compute it.
 
-    # If it is an augmented matrix, then ignore the constant values
-    if augmented == True:
-        # Isolating the coefficient matrix (removing the constant terms)
-        M = M[:, :-1]
+    det_A = np.linalg.det(A)
 
-    # Get the desired row
-    row_array = M[row]
-    for i, val in enumerate(row_array):
-        # If finds a non zero value, returns the index. Otherwise returns -1.
-        if not np.isclose(val, 0, atol=1e-5):
-            return i
-    return -1
-def augmented_matrix(A, B):
-    """
-    Create an augmented matrix by horizontally stacking two matrices A and B.
+    # Returns "Singular system" if determinant is zero
+    if np.isclose(det_A, 0) == True:
+        return 'Singular system'
 
-    Parameters:
-    - A (numpy.array): First matrix.
-    - B (numpy.array): Second matrix.
+    # Make copies of the input matrices to avoid modifying the originals
+    A = A.copy()
+    B = B.copy()
 
-    Returns:
-    - numpy.array: Augmented matrix obtained by horizontally stacking A and B.
-    """
-    augmented_M = np.hstack((A,B))
-    return augmented_M
-A = np.array([[1,2,3], [3,4,5], [4,5,6]])
-B = np.array([[1], [5], [7]])
+    # Convert matrices to float to prevent integer division
+    A = A.astype('float64')
+    B = B.astype('float64')
 
-arrayOne=np.array([[1,2],[1,2]])
-arrayTwo=np.array([[3,4],[0,4]])
-print(np.hstack((arrayOne,arrayTwo)))
-print(A[0,0])
+    # Number of rows in the coefficient matrix
+    num_rows = len(A)
+
+    ### START CODE HERE ###
+
+    # Transform matrices A and B into the augmented matrix M
+    M = augmented_matrix(A, B)
+
+    # Iterate over the rows.
+    for row in range(num_rows):
+
+        # The first pivot candidate is always in the main diagonal, let's get it.
+        # Remember that the diagonal elements in a matrix has the same index for row and column.
+        # You may access a matrix value by typing M[row, column]. In this case, column = None
+        pivot_candidate = M[row, row]
+
+        # If pivot_candidate is zero, it cannot be a pivot for this row.
+        # So the first step you need to take is to look at the rows below it to check if there is a non-zero element in the same column.
+        # The usage of np.isclose is a good practice when comparing two floats.
+        if np.isclose(pivot_candidate, 0) == True:
+            # Get the index of the first non-zero value below the pivot_candidate.
+            first_non_zero_value_below_pivot_candidate = get_index_first_non_zero_value_from_column(M, row, row)
+
+            # Swap rows
+            M = swap_rows(M, row, first_non_zero_value_below_pivot_candidate)
+
+            # Get the pivot, which is in the main diagonal now
+            pivot = M[row, row]
+
+            # If pivot_candidate is already non-zero, then it is the pivot for this row
+        else:
+            pivot = pivot_candidate
+
+            # Now you are ready to apply the row reduction in every row below the current
+
+        # Divide the current row by the pivot, so the new pivot will be 1. You may use the formula current_row -> 1/pivot * current_row
+        # Where current_row can be accessed using M[row].
+        M[row] = None * M[row]
+
+        # Perform row reduction for rows below the current row
+        for j in range(row + 1, num_rows):
+            # Get the value in the row that is below the pivot value.
+            # Remember that, since you are dealing only with non-singular matrices, the pivot is in the main diagonal.
+            # Therefore, the values in row j that are below the pivot, must have column index the same index as the column index for the pivot.
+            value_below_pivot = M[None, None]
+
+            # Perform row reduction using the formula:
+            # row_to_reduce -> row_to_reduce - value_below_pivot * pivot_row
+            M[j] = M[None] - value_below_pivot * M[None]
+
+    ### END CODE HERE ###
+
+    return M
+A = np.array([[1,2,3],[0,1,0], [0,0,5]])
+B = np.array([[1], [2], [4]])
+row_echelon_form(A,B)
